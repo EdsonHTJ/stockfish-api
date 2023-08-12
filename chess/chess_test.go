@@ -3,6 +3,7 @@ package chess_test
 import (
 	"fmt"
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/EdsonHTJ/stockfish-api/chess"
@@ -44,4 +45,37 @@ func TestFullGame(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
+}
+
+func TestParalelGames(t *testing.T) {
+	stockFish := chess.New()
+
+	wg := sync.WaitGroup{}
+	wg.Add(10)
+	createGame := func(index int, t *testing.T) {
+		move := &chess.Move{Table: "2k5/8/3b4/8/8/8/4R3/K1R5 b - - 0 1"}
+		for {
+			var err error
+			tableCpy := move.Table
+			fmt.Println("Game: ", index, "Stauts: ", move)
+			move, err = stockFish.Move(20, tableCpy)
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			if move.Move == "(none)" {
+				fmt.Println("Game: ", index, "Stauts: ", move)
+				break
+			}
+		}
+
+		wg.Done()
+	}
+
+	for i := 0; i < 10; i++ {
+		go createGame(i, t)
+	}
+
+	wg.Wait()
 }
