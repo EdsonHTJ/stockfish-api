@@ -6,9 +6,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
-
-	"github.com/notnil/chess"
 )
 
 const (
@@ -51,6 +50,10 @@ func New() *Driver {
 }
 
 func (d *Driver) Move(skillLevel uint16, state TableState) (*Move, error) {
+
+	if !state.IsValid() {
+		return nil, errors.New("stockfish: invalid fen state")
+	}
 
 	buf := bytes.NewBuffer([]byte{})
 
@@ -105,17 +108,17 @@ func getScriptFile(folder string, name string) string {
 	return folder + "/" + name
 }
 
-func updateFENWithMove(fenStr string, moveStr string) (TableState, error) {
-	fenOpts, err := chess.FEN(fenStr)
+func (s TableState) IsValid() bool {
+	// Define the regex pattern
+	pattern := `^([rnbqkpRNBQKP1-8]+\/){7}[rnbqkpRNBQKP1-8]+ [wb] [KQkq-]{1,4} ([a-h][36]|-) \d+ \d+$`
+
+	// Compile the regex
+	re, err := regexp.Compile(pattern)
 	if err != nil {
-		return "", err
+		// Handle error
+		return false
 	}
 
-	game := chess.NewGame(fenOpts)
-	err = game.MoveStr(moveStr)
-	if err != nil {
-		return "", err
-	}
-
-	return TableState(game.FEN()), nil
+	// Check if the fen matches the pattern
+	return re.MatchString(string(s))
 }
