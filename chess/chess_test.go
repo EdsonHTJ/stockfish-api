@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/EdsonHTJ/stockfish-api/chess"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -15,7 +15,7 @@ const (
 	TEST_SCRIPTS_FOLDER = "../scripts"
 )
 
-//TestMain
+// TestMain
 func TestMain(m *testing.M) {
 	os.Setenv(chess.EXE_FILE_PATH_ENV, TEST_EXEC_PATH)
 	os.Setenv(chess.SCRIPTS_FILE_PATH_ENV, TEST_SCRIPTS_FOLDER)
@@ -25,7 +25,7 @@ func TestMain(m *testing.M) {
 func TestNextMove(t *testing.T) {
 	stockFish := chess.New()
 	Move, err := stockFish.Move(20, chess.BASE_FEN)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	t.Log(Move)
 }
