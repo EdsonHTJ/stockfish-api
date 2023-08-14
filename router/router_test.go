@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/EdsonHTJ/stockfish-api/chess"
@@ -53,18 +54,57 @@ func TestMoveHandler(t *testing.T) {
 }
 
 func TestWebSocketHandler(t *testing.T) {
-	moveRequest := dto.MoveRequest{Table: chess.BASE_FEN, Level: 20}
+	moveWsRequest := dto.MoveWsRequest{
+		ReqType: dto.PLAY_MOVE,
+		MoveRequest: dto.MoveRequest{
+			Table: chess.BASE_FEN,
+			Level: 20,
+		},
+	}
 
 	ws, err := websocket.Dial("ws://localhost:8080/ws", "", URL)
 	require.NoError(t, err)
 
-	err = websocket.JSON.Send(ws, moveRequest)
+	err = websocket.JSON.Send(ws, moveWsRequest)
 	require.NoError(t, err)
 
 	var moveResponse dto.MoveResponse
 	err = websocket.JSON.Receive(ws, &moveResponse)
-	require.NoError(t, err)
 
+	require.NoError(t, err)
 	require.NotEmpty(t, moveResponse.Move)
 	require.NotEmpty(t, moveResponse.FenTable)
+}
+
+func TestPlayGameWs(t *testing.T) {
+	moveWsRequest := dto.MoveWsRequest{
+		ReqType:    dto.PLAY_GAME,
+		MoveLimits: 5,
+		MoveRequest: dto.MoveRequest{
+			Table: chess.BASE_FEN,
+			Level: 20,
+		},
+	}
+
+	ws, err := websocket.Dial("ws://localhost:8080/ws", "", URL)
+	require.NoError(t, err)
+
+	wg := sync.WaitGroup{}
+	wg.Add(5)
+	go func() {
+		for {
+			var moveResponse dto.MoveResponse
+			err = websocket.JSON.Receive(ws, &moveResponse)
+			require.NoError(t, err)
+			require.NotEmpty(t, moveResponse.Move)
+			require.NotEmpty(t, moveResponse.FenTable)
+			t.Log(moveResponse)
+			wg.Done()
+		}
+	}()
+
+	err = websocket.JSON.Send(ws, moveWsRequest)
+	require.NoError(t, err)
+
+	wg.Wait()
 }

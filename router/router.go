@@ -52,26 +52,19 @@ func MoveHandler(c *gin.Context) {
 
 func HandleWebSocket(c *gin.Context) {
 	handler := websocket.Handler(func(ws *websocket.Conn) {
-		var request dto.MoveRequest
+		var request dto.MoveWsRequest
 		err := websocket.JSON.Receive(ws, &request)
 		if err != nil {
 			websocket.JSON.Send(ws, dto.ErrorResponse{Error: err.Error()})
 			return
 		}
 
-		table := request.Table
-		if !table.IsValid() {
-			websocket.JSON.Send(ws, dto.ErrorResponse{Error: "Invalid table"})
-			return
+		switch request.ReqType {
+		case dto.PLAY_MOVE:
+			PlayMoveWs(ws, request)
+		case dto.PLAY_GAME:
+			PlayGameWs(ws, request)
 		}
-
-		move, err := chessDriver.Move(request.Level, table)
-		if err != nil {
-			websocket.JSON.Send(ws, dto.ErrorResponse{Error: err.Error()})
-			return
-		}
-
-		websocket.JSON.Send(ws, dto.MoveResponse{Move: move.Move, FenTable: string(move.Table)})
 	})
 
 	handler.ServeHTTP(c.Writer, c.Request)
