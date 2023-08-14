@@ -1,0 +1,88 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/move": {
+            "post": {
+                "description": "Ask for a move",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "example"
+                ],
+                "summary": "Ask for a move",
+                "parameters": [
+                    {
+                        "description": "Move Request Body",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.MoveRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.MoveResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dto.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.MoveRequest": {
+            "type": "object",
+            "properties": {
+                "level": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "table": {
+                    "type": "string",
+                    "example": "2k5/8/3b4/8/8/8/4R3/K1R5 b - - 0 1"
+                }
+            }
+        },
+        "dto.MoveResponse": {
+            "type": "object",
+            "properties": {
+                "fenTable": {
+                    "type": "string"
+                },
+                "move": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

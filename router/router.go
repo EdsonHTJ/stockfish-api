@@ -4,14 +4,30 @@ import (
 	"net/http"
 
 	"github.com/EdsonHTJ/stockfish-api/chess"
+	docs "github.com/EdsonHTJ/stockfish-api/docs"
 	"github.com/EdsonHTJ/stockfish-api/dto"
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"golang.org/x/net/websocket"
 )
 
 // Chess Driver
 var chessDriver *chess.Driver
 
+// Move route godoc
+// @Summary Ask for a move
+// @Schemes
+// @Description Ask for a move
+// @Tags example
+// @Accept json
+// @Produce json
+// @Param body body dto.MoveRequest true "Move Request Body"
+// @Example {"table": "2k5/8/3b4/8/8/8/4R3/K1R5 b - - 0 1", "level": 20}
+// @Success 200 {object} dto.MoveResponse
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /move [post]
 func MoveHandler(c *gin.Context) {
 	var req dto.MoveRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -65,8 +81,12 @@ func HandleWebSocket(c *gin.Context) {
 func New() *gin.Engine {
 	chessDriver = chess.New()
 
+	docs.SwaggerInfo.BasePath = "/"
+
 	r := gin.Default()
 	r.POST("/move", MoveHandler)
 	r.GET("/ws", HandleWebSocket)
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+
 	return r
 }

@@ -1,0 +1,56 @@
+definitions:
+  dto.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  dto.MoveRequest:
+    properties:
+      level:
+        example: 20
+        type: integer
+      table:
+        example: 2k5/8/3b4/8/8/8/4R3/K1R5 b - - 0 1
+        type: string
+    type: object
+  dto.MoveResponse:
+    properties:
+      fenTable:
+        type: string
+      move:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /move:
+    post:
+      consumes:
+      - application/json
+      description: Ask for a move
+      parameters:
+      - description: Move Request Body
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/dto.MoveRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.MoveResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Ask for a move
+      tags:
+      - example
+swagger: "2.0"
